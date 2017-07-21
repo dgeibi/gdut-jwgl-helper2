@@ -1,0 +1,13 @@
+{
+  "env": {
+    "greasemonkey": true,
+    "browser": true
+  },
+  "rules": {
+    "semi":["error","always"]
+  },
+  "extends": "eslint:recommended",
+  "globals": {
+    "$": false
+  }
+}
