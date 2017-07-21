@@ -1,5 +1,7 @@
 # gdut-jwgl-helper2
 
+基于 [vtmer/gdut-jwgl-helper](https://github.com/vtmer/gdut-jwgl-helper)，对新教务系统进行适配。
+
 ## 功能
 
 ### 计算平均绩点和平均分
@@ -8,43 +10,29 @@
 
 ### 导出课程表到日历文件
 
-#### 课程表黑名单
-
-通过修改代码添加黑名单：
+添加课程黑名单：
 
 ``` javascript
+// 修改 helper.js
 var courseBlackList = ["大学英语(4)","软件工程"]
 ```
 
-#### 导出步骤
+导出步骤：课表查询 -> 周次（全部）-> 查询课表 -> 列表展示 -> 导出课表
 
-课表查询 -> 周次（全部）-> 查询课表 -> 列表展示 -> 导出课表
-
-#### 使用 ics 文件
-
-导入 Outlook 日历，Google Calendar
+使用 ics 文件：导入 Outlook 日历或 Google Calendar。
 
 ## 安装
 
 ### Chrome
 
-__方法 1__
-
-Open "chrome://extensions", enable "Developer mode",
+方法 1：Open "chrome://extensions", enable "Developer mode",
 click "Load unpacked extension..." and select the directory of gdut-jwgl-helper.
 
-__方法 2__
-
-安装 [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)，复制 helper.js 到 Tampermonkey。
+方法 2：安装 [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)，复制 helper.js 到 Tampermonkey。
 
 ### Firefox
 
-__方法 1__
-
-Open "about:debugging", click "Load Temporary Add-on" and select any file in
+方法 1：Open "about:debugging", click "Load Temporary Add-on" and select any file in
 gdut-jwgl-helper's directory.
 
-__方法 2__
-
-安装 [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)，添加
-helper.js。
+方法 2：安装 [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)，添加 helper.js。
