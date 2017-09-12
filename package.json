@@ -1,0 +1,19 @@
+{
+  "name": "gdut-jwgl-helper2",
+  "version": "1.0.0",
+  "description": "基于 [vtmer/gdut-jwgl-helper](https://github.com/vtmer/gdut-jwgl-helper)，对新教务系统进行适配。",
+  "main": "helper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dgeibi/gdut-jwgl-helper2.git"
+  },
+  "author": "dgeibi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dgeibi/gdut-jwgl-helper2/issues"
+  },
+  "homepage": "https://github.com/dgeibi/gdut-jwgl-helper2#readme"
+}

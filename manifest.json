@@ -1,6 +1,6 @@
 {
   "name": "GDUT 教务管理系统 helper2",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "manifest_version": 2,
   "description": "make http://222.200.98.147/ better.",
   "content_scripts": [

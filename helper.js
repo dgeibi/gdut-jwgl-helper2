@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         gdut-jwgl-helper2
 // @namespace    https://github.com/dgeibi/gdut-jwgl-helper2
-// @version      0.3.0
+// @version      0.3.1
 // @description  make http://222.200.98.147/ better.
 // @copyright    2013-2016 VTM STUDIO
 // @copyright    2017 dgeibi
@@ -65,8 +65,7 @@ function download(url, filename) {
   if (link.download !== undefined) {
     link.setAttribute('href', url);
     link.setAttribute('download', filename);
-    var event = new MouseEvent('click');
-    link.dispatchEvent(event);
+    link.dispatchEvent(new MouseEvent('click'));
   }
 }
 
@@ -89,18 +88,6 @@ var GPA = {
     // 没有填写的情况当作 0 （出现在重修栏）
     else if (score === '') return 0;
     else return parseFloat(score);
-  },
-
-  // 从分数或等级计算绩点
-  //
-  // 绩点计算公式：
-  //
-  //      GPA = (s - 50) / 10         (s >= 60)
-  //            0                     (s < 60)
-  fromScoreOrGradeLevel: function (score) {
-    score = GPA.realScore(score);
-
-    return (score < 60) ? 0 : ((score - 50) / 10);
   },
 
   // 计算一门课程的学分绩点
@@ -159,11 +146,11 @@ var GPA = {
 //
 // * code        :  课程代码
 // * name        :  课程名称
-// * type        :  课程性质（公共基础？专业基础？）
+// * type        :  课程大类（公共基础？专业基础？）
 // * attribution :  课程归属（人文社科？工程基础？）
 // * grade:
 //    - score    :  课程成绩
-//    - type     :  考试类型
+//    - type     :  考试性质
 // * credit      :  学分
 // * gpa         :  绩点
 function Lecture() {
@@ -171,7 +158,6 @@ function Lecture() {
   this.name = null;
   this.type = null;
   this.attribution = null;
-  this.isMinor = false;
   this.credit = 0.0;
   this.grade = {
     score: 0.0,
@@ -197,11 +183,11 @@ Lecture.fromTableRow = function (row) {
   lecture.code = takeFromRows(3, parseText);
   lecture.name = takeFromRows(4, parseText);
   lecture.grade.score = takeFromRows(5, parseFloatOrText) || 0.0;
-  lecture.gpa = takeFromRows(6, parseFloatOrText) || 0.0;
+  lecture.grade.type = takeFromRows(13, parseText);
+  lecture.gpa = lecture.grade.type === '正常考试' ? takeFromRows(6, parseFloatOrText) || 0.0 : 0.0;
   lecture.credit = takeFromRows(8, parseFloatOrText);
   lecture.type = takeFromRows(9, parseText);
   lecture.attribution = takeFromRows(10, parseText);
-  lecture.grade.type = takeFromRows(13, parseText);
 
   return lecture;
 };
