@@ -26,13 +26,17 @@ var courseBlackList = ["大学英语(4)","软件工程"];
 ### Chrome
 
 方法 1：Open "chrome://extensions", enable "Developer mode",
-click "Load unpacked extension..." and select the directory of gdut-jwgl-helper.
+click "Load unpacked extension..." and select the directory `dist` of gdut-jwgl-helper.
 
-方法 2：安装 [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)，复制 helper.js 到 Tampermonkey。
+方法 2：安装 [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)，复制 `dist/helper.js` 到 Tampermonkey。
 
 ### Firefox
 
-方法 1：Open "about:debugging", click "Load Temporary Add-on" and select any file in
-gdut-jwgl-helper's directory.
+方法 1：Open "about:debugging", click "Load Temporary Add-on" and
+select any file in gdut-jwgl-helper's `dist` directory.
 
-方法 2：安装 [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)，添加 helper.js。
+方法 2：安装 [Tampermonkey](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)，复制 `dist/helper.js` 到 Tampermonkey。
+
+### 其它浏览器
+
+安装 [Tampermonkey](http://tampermonkey.net/)，复制 `dist/helper.js` 到 Tampermonkey。

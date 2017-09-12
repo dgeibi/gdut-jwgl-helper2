@@ -412,7 +412,6 @@ var score = function () {
     renderAllYear();
   });
 
-
   function bindTable() {
     var $scoreRows = $('table.datagrid-btable tbody tr');
 

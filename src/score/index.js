@@ -97,7 +97,6 @@ export default () => {
     renderAllYear();
   });
 
-
   function bindTable() {
     const $scoreRows = $('table.datagrid-btable tbody tr');
 

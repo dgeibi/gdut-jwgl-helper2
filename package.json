@@ -2,11 +2,13 @@
   "name": "gdut-jwgl-helper2",
   "version": "0.3.3",
   "description": "基于 [vtmer/gdut-jwgl-helper](https://github.com/vtmer/gdut-jwgl-helper)，对新教务系统进行适配。",
-  "main": "helper.js",
+  "main": "dist/helper.js",
   "scripts": {
-    "build": "rollup -c",
+    "build:manifest": "node update-manifest.js",
+    "build:js": "rollup -c",
+    "build": "npm run build:js && npm run build:manifest",
     "lint": "eslint .",
-    "format": "prettier-eslint --write 'src/**.js' 'rollup.config.js'"
+    "format": "prettier-eslint --write 'src/**/*.js' '*.js'"
   },
   "repository": {
     "type": "git",
