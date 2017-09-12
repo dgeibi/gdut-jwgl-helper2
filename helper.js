@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         gdut-jwgl-helper2
 // @namespace    https://github.com/dgeibi/gdut-jwgl-helper2
-// @version      0.3.2
+// @version      0.3.3
 // @description  make http://222.200.98.147/ better.
 // @copyright    2013-2016 VTM STUDIO
 // @copyright    2017 dgeibi
@@ -263,12 +263,18 @@ function Lecture() {
   this.gpa = 0.0;
 }
 
-var parseText = function (x) { return $(x)
-    .text()
-    .trim(); };
+var parseText = function (x) { return String(x).trim(); };
 
 var parseFloatOrText = function (x) {
   var parsedText = parseText(x);
+  var parsedFloat = parseFloat(parsedText);
+  return isNaN(parsedFloat) ? parsedText : parsedFloat;
+};
+
+var parseText$ = function (x) { return parseText($(x).text()); };
+
+var parseFloatOrText$ = function (x) {
+  var parsedText = parseText$(x);
   var parsedFloat = parseFloat(parsedText);
   return isNaN(parsedFloat) ? parsedText : parsedFloat;
 };
@@ -277,24 +283,64 @@ var parseFloatOrText = function (x) {
 Lecture.fromTableRow = function (row) {
   var $cols = $('td', row);
   var lecture = new Lecture();
-  var takeFromRows = function (idx, parser) { return parser($cols[idx]); };
+  var take = function (idx, parser) { return parser($cols[idx]); };
 
-  lecture.code = takeFromRows(3, parseText);
-  lecture.name = takeFromRows(4, parseText);
-  lecture.grade.score = takeFromRows(5, parseFloatOrText) || 0.0;
-  lecture.grade.type = takeFromRows(13, parseText);
-  lecture.gpa = lecture.grade.type === '正常考试' ? takeFromRows(6, parseFloatOrText) || 0.0 : 0.0;
-  lecture.credit = takeFromRows(8, parseFloatOrText);
-  lecture.type = takeFromRows(9, parseText);
-  lecture.attribution = takeFromRows(10, parseText);
+  lecture.code = take(3, parseText$);
+  lecture.name = take(4, parseText$);
+  lecture.grade.score = take(5, parseFloatOrText$) || 0.0;
+  lecture.grade.type = take(13, parseText$);
+  lecture.gpa = lecture.grade.type === '正常考试' ? take(6, parseFloatOrText$) || 0.0 : 0.0;
+  lecture.credit = take(8, parseFloatOrText$);
+  lecture.type = take(9, parseText$);
+  lecture.attribution = take(10, parseText$);
 
   return lecture;
 };
 
+Lecture.fromObj = function (row) {
+  var lecture = new Lecture();
+  var take = function (key, parser) { return (parser ? parser(row[key]) : row[key]); };
+
+  lecture.name = take('kcmc', parseText);
+  lecture.grade.score = take('zcj', parseFloatOrText) || 0.0;
+  lecture.grade.type = take('ksxzmc', parseText);
+  lecture.gpa = lecture.grade.type === '正常考试' ? take('cjjd', parseFloatOrText) || 0.0 : 0.0;
+  lecture.credit = take('xf', parseFloatOrText);
+
+  return lecture;
+};
+
+Lecture.fromObjs = function (rows) { return rows.map(Lecture.fromObj); };
+
 // 从 `table` 中获取一系列课程信息
 Lecture.fromRows = function (rows) { return $.map(rows, Lecture.fromTableRow); };
 
+function enlargeThreshold(change) {
+  var bottomRow = document.getElementsByClassName('datagrid-pager')[0].children[0].children[0]
+    .rows[0];
+  var select = bottomRow.cells[0].children[0];
+  Array.prototype.forEach.call(select.options, function (option) {
+    option.innerText = '1000';
+  });
+  select.value = '1000';
+  if (change) { $(select).change(); }
+}
+
+function fetchScoreData(callback) {
+  return $.ajax({
+    type: 'POST',
+    url: 'xskccjxx!getDataList.action?miao',
+    data: 'xnxqdm=&jhlxdm=&page=1&rows=1000&sort=xnxqdm&order=asc',
+    dataType: 'json',
+    success: callback,
+  });
+}
+
 var score = function () {
+  enlargeThreshold(true);
+
+  var scoreDatas = null;
+
   // 页面元素
   var $infoRows = $('#tb table tbody');
   var $scoreTableHead = $('table.datagrid-htable tbody tr');
@@ -303,9 +349,14 @@ var score = function () {
 
   // 插入汇总栏: 平均绩点、平均分、加权平均分
   var $avgRow = $('<tr></tr>').appendTo($infoRows);
-  var $avgGPA = $('<td class="avg-gpa" ></td>').appendTo($avgRow);
-  var $avgScore = $('<td class="avg-score"></td>').appendTo($avgRow);
-  var $weightedAvgScore = $('<td class="weighted-avg-score"></td>').appendTo($avgRow);
+  var $avgGPA = $('<td></td>').appendTo($avgRow);
+  var $avgScore = $('<td></td>').appendTo($avgRow);
+  var $weightedAvgScore = $('<td></td>').appendTo($avgRow);
+
+  var $allYearRow = $('<tr></tr>').appendTo($infoRows);
+  var $allYearAvgGPA = $('<td></td>').appendTo($allYearRow);
+  var $allYearAvgScore = $('<td></td>').appendTo($allYearRow);
+  var $allYearWeightedAvgScore = $('<td></td>').appendTo($allYearRow);
 
   // 表头
   $('<td style="width: 50px; text-align: center;">学分绩点</td>').appendTo($scoreTableHead);
@@ -317,15 +368,15 @@ var score = function () {
     '<td style="width: 50px; text-align: center;"><input type="checkbox" class="lecture-check" /></td>' ];
 
   // 重新计算汇总成绩
-  var renderSummarize = function () {
+  var renderSelected = function () {
     var checkedRows = $('.lecture-check:checked')
       .parent()
       .parent();
     var lectures = Lecture.fromRows(checkedRows);
 
-    $avgGPA.text(("平均绩点: " + (GPA.avgCreditGPA(lectures).toFixed(2))));
-    $avgScore.text(("平均分: " + (GPA.avgScore(lectures).toFixed(2))));
-    $weightedAvgScore.text(("加权平均分: " + (GPA.avgWeightedScore(lectures).toFixed(2))));
+    $avgGPA.text(("平均绩点：" + (GPA.avgCreditGPA(lectures).toFixed(2))));
+    $avgScore.text(("平均分：" + (GPA.avgScore(lectures).toFixed(2))));
+    $weightedAvgScore.text(("加权平均分：" + (GPA.avgWeightedScore(lectures).toFixed(2))));
   };
 
   $('.lecture-check-all').change(function () {
@@ -333,11 +384,36 @@ var score = function () {
     $('.lecture-check').prop('checked', $('.lecture-check-all').is(':checked'));
 
     // 触发重新计算汇总栏
-    renderSummarize();
+    renderSelected();
   });
 
-  function afterLoad(event, xhr, settings) {
-    if (settings.url !== 'xskccjxx!getDataList.action') { return; }
+  function renderAllYear() {
+    if (scoreDatas) {
+      var from = $('#xnxqdm')[0].value.slice(0, 4);
+      if (from !== '') {
+        var rows = scoreDatas.filter(function (x) { return x.xnxqdm.indexOf(from) === 0; });
+        var lectures = Lecture.fromObjs(rows);
+        var to = String(Number(from) + 1);
+        $allYearAvgGPA.text(("[" + from + "-" + to + "学年] 平均绩点：" + (GPA.avgCreditGPA(lectures).toFixed(2))));
+        $allYearAvgScore.text(("平均分：" + (GPA.avgScore(lectures).toFixed(2))));
+        $allYearWeightedAvgScore.text(("加权平均分：" + (GPA.avgWeightedScore(lectures).toFixed(2))));
+      } else {
+        $allYearAvgGPA.text('');
+        $allYearAvgScore.text('');
+        $allYearWeightedAvgScore.text('');
+      }
+    }
+  }
+
+  fetchScoreData(function (ref) {
+    var rows = ref.rows;
+
+    scoreDatas = rows;
+    renderAllYear();
+  });
+
+
+  function bindTable() {
     var $scoreRows = $('table.datagrid-btable tbody tr');
 
     // 课程信息
@@ -360,9 +436,17 @@ var score = function () {
       $checkbox.prop('checked', !$checkbox.prop('checked')).trigger('change');
     });
 
-    $('.lecture-check').change(renderSummarize);
+    $('.lecture-check').change(renderSelected);
     $('.lecture-check-all').trigger('change');
   }
+
+  function afterLoad(event, xhr, settings) {
+    if (settings.url !== 'xskccjxx!getDataList.action') { return; }
+    enlargeThreshold(false);
+    bindTable();
+    renderAllYear();
+  }
+
   $(document).ajaxSuccess(afterLoad);
 };
 

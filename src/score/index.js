@@ -1,7 +1,32 @@
 import GPA from './GPA';
 import Lecture from './Lecture';
 
+function enlargeThreshold(change) {
+  const bottomRow = document.getElementsByClassName('datagrid-pager')[0].children[0].children[0]
+    .rows[0];
+  const select = bottomRow.cells[0].children[0];
+  Array.prototype.forEach.call(select.options, (option) => {
+    option.innerText = '1000';
+  });
+  select.value = '1000';
+  if (change) $(select).change();
+}
+
+function fetchScoreData(callback) {
+  return $.ajax({
+    type: 'POST',
+    url: 'xskccjxx!getDataList.action?miao',
+    data: 'xnxqdm=&jhlxdm=&page=1&rows=1000&sort=xnxqdm&order=asc',
+    dataType: 'json',
+    success: callback,
+  });
+}
+
 export default () => {
+  enlargeThreshold(true);
+
+  let scoreDatas = null;
+
   // 页面元素
   const $infoRows = $('#tb table tbody');
   const $scoreTableHead = $('table.datagrid-htable tbody tr');
@@ -10,9 +35,14 @@ export default () => {
 
   // 插入汇总栏: 平均绩点、平均分、加权平均分
   const $avgRow = $('<tr></tr>').appendTo($infoRows);
-  const $avgGPA = $('<td class="avg-gpa" ></td>').appendTo($avgRow);
-  const $avgScore = $('<td class="avg-score"></td>').appendTo($avgRow);
-  const $weightedAvgScore = $('<td class="weighted-avg-score"></td>').appendTo($avgRow);
+  const $avgGPA = $('<td></td>').appendTo($avgRow);
+  const $avgScore = $('<td></td>').appendTo($avgRow);
+  const $weightedAvgScore = $('<td></td>').appendTo($avgRow);
+
+  const $allYearRow = $('<tr></tr>').appendTo($infoRows);
+  const $allYearAvgGPA = $('<td></td>').appendTo($allYearRow);
+  const $allYearAvgScore = $('<td></td>').appendTo($allYearRow);
+  const $allYearWeightedAvgScore = $('<td></td>').appendTo($allYearRow);
 
   // 表头
   $('<td style="width: 50px; text-align: center;">学分绩点</td>').appendTo($scoreTableHead);
@@ -25,15 +55,15 @@ export default () => {
   ];
 
   // 重新计算汇总成绩
-  const renderSummarize = () => {
+  const renderSelected = () => {
     const checkedRows = $('.lecture-check:checked')
       .parent()
       .parent();
     const lectures = Lecture.fromRows(checkedRows);
 
-    $avgGPA.text(`平均绩点: ${GPA.avgCreditGPA(lectures).toFixed(2)}`);
-    $avgScore.text(`平均分: ${GPA.avgScore(lectures).toFixed(2)}`);
-    $weightedAvgScore.text(`加权平均分: ${GPA.avgWeightedScore(lectures).toFixed(2)}`);
+    $avgGPA.text(`平均绩点：${GPA.avgCreditGPA(lectures).toFixed(2)}`);
+    $avgScore.text(`平均分：${GPA.avgScore(lectures).toFixed(2)}`);
+    $weightedAvgScore.text(`加权平均分：${GPA.avgWeightedScore(lectures).toFixed(2)}`);
   };
 
   $('.lecture-check-all').change(() => {
@@ -41,11 +71,34 @@ export default () => {
     $('.lecture-check').prop('checked', $('.lecture-check-all').is(':checked'));
 
     // 触发重新计算汇总栏
-    renderSummarize();
+    renderSelected();
   });
 
-  function afterLoad(event, xhr, settings) {
-    if (settings.url !== 'xskccjxx!getDataList.action') return;
+  function renderAllYear() {
+    if (scoreDatas) {
+      const from = $('#xnxqdm')[0].value.slice(0, 4);
+      if (from !== '') {
+        const rows = scoreDatas.filter(x => x.xnxqdm.indexOf(from) === 0);
+        const lectures = Lecture.fromObjs(rows);
+        const to = String(Number(from) + 1);
+        $allYearAvgGPA.text(`[${from}-${to}学年] 平均绩点：${GPA.avgCreditGPA(lectures).toFixed(2)}`);
+        $allYearAvgScore.text(`平均分：${GPA.avgScore(lectures).toFixed(2)}`);
+        $allYearWeightedAvgScore.text(`加权平均分：${GPA.avgWeightedScore(lectures).toFixed(2)}`);
+      } else {
+        $allYearAvgGPA.text('');
+        $allYearAvgScore.text('');
+        $allYearWeightedAvgScore.text('');
+      }
+    }
+  }
+
+  fetchScoreData(({ rows }) => {
+    scoreDatas = rows;
+    renderAllYear();
+  });
+
+
+  function bindTable() {
     const $scoreRows = $('table.datagrid-btable tbody tr');
 
     // 课程信息
@@ -68,8 +121,16 @@ export default () => {
       $checkbox.prop('checked', !$checkbox.prop('checked')).trigger('change');
     });
 
-    $('.lecture-check').change(renderSummarize);
+    $('.lecture-check').change(renderSelected);
     $('.lecture-check-all').trigger('change');
   }
+
+  function afterLoad(event, xhr, settings) {
+    if (settings.url !== 'xskccjxx!getDataList.action') return;
+    enlargeThreshold(false);
+    bindTable();
+    renderAllYear();
+  }
+
   $(document).ajaxSuccess(afterLoad);
 };

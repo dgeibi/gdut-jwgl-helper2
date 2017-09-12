@@ -1,6 +1,6 @@
 {
   "name": "gdut-jwgl-helper2",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "基于 [vtmer/gdut-jwgl-helper](https://github.com/vtmer/gdut-jwgl-helper)，对新教务系统进行适配。",
   "main": "helper.js",
   "scripts": {

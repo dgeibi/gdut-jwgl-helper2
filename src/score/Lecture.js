@@ -22,13 +22,18 @@ function Lecture() {
   this.gpa = 0.0;
 }
 
-const parseText = x =>
-  $(x)
-    .text()
-    .trim();
+const parseText = x => String(x).trim();
 
 const parseFloatOrText = (x) => {
   const parsedText = parseText(x);
+  const parsedFloat = parseFloat(parsedText);
+  return isNaN(parsedFloat) ? parsedText : parsedFloat;
+};
+
+const parseText$ = x => parseText($(x).text());
+
+const parseFloatOrText$ = (x) => {
+  const parsedText = parseText$(x);
   const parsedFloat = parseFloat(parsedText);
   return isNaN(parsedFloat) ? parsedText : parsedFloat;
 };
@@ -37,19 +42,34 @@ const parseFloatOrText = (x) => {
 Lecture.fromTableRow = (row) => {
   const $cols = $('td', row);
   const lecture = new Lecture();
-  const takeFromRows = (idx, parser) => parser($cols[idx]);
+  const take = (idx, parser) => parser($cols[idx]);
 
-  lecture.code = takeFromRows(3, parseText);
-  lecture.name = takeFromRows(4, parseText);
-  lecture.grade.score = takeFromRows(5, parseFloatOrText) || 0.0;
-  lecture.grade.type = takeFromRows(13, parseText);
-  lecture.gpa = lecture.grade.type === '正常考试' ? takeFromRows(6, parseFloatOrText) || 0.0 : 0.0;
-  lecture.credit = takeFromRows(8, parseFloatOrText);
-  lecture.type = takeFromRows(9, parseText);
-  lecture.attribution = takeFromRows(10, parseText);
+  lecture.code = take(3, parseText$);
+  lecture.name = take(4, parseText$);
+  lecture.grade.score = take(5, parseFloatOrText$) || 0.0;
+  lecture.grade.type = take(13, parseText$);
+  lecture.gpa = lecture.grade.type === '正常考试' ? take(6, parseFloatOrText$) || 0.0 : 0.0;
+  lecture.credit = take(8, parseFloatOrText$);
+  lecture.type = take(9, parseText$);
+  lecture.attribution = take(10, parseText$);
 
   return lecture;
 };
+
+Lecture.fromObj = (row) => {
+  const lecture = new Lecture();
+  const take = (key, parser) => (parser ? parser(row[key]) : row[key]);
+
+  lecture.name = take('kcmc', parseText);
+  lecture.grade.score = take('zcj', parseFloatOrText) || 0.0;
+  lecture.grade.type = take('ksxzmc', parseText);
+  lecture.gpa = lecture.grade.type === '正常考试' ? take('cjjd', parseFloatOrText) || 0.0 : 0.0;
+  lecture.credit = take('xf', parseFloatOrText);
+
+  return lecture;
+};
+
+Lecture.fromObjs = rows => rows.map(Lecture.fromObj);
 
 // 从 `table` 中获取一系列课程信息
 Lecture.fromRows = rows => $.map(rows, Lecture.fromTableRow);
