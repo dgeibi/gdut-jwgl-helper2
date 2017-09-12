@@ -13,8 +13,8 @@
 添加课程黑名单：
 
 ``` javascript
-// 修改 helper.js
-var courseBlackList = ["大学英语(4)","软件工程"]
+// 修改 helper.js 如下
+var courseBlackList = ["大学英语(4)","软件工程"];
 ```
 
 导出步骤：课表查询 -> 周次（全部）-> 查询课表 -> 列表展示 -> 导出课表

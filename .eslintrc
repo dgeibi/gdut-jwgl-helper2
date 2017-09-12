@@ -1,13 +1,16 @@
 {
   "env": {
-    "greasemonkey": true,
     "browser": true
   },
   "rules": {
-    "semi":["error","always"]
+    "semi":["error","always"],
+    "no-restricted-globals": "off",
+    "no-mixed-operators": "off",
+    "no-param-reassign": "off"
   },
-  "extends": "eslint:recommended",
+  "extends": "dgeibi",
   "globals": {
-    "$": false
+    "$": false,
+    "courseBlackList": false
   }
 }
