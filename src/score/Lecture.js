@@ -27,7 +27,7 @@ const parseText = x => String(x).trim();
 const parseFloatOrText = (x) => {
   const parsedText = parseText(x);
   const parsedFloat = parseFloat(parsedText);
-  return isNaN(parsedFloat) ? parsedText : parsedFloat;
+  return Number.isNaN(parsedFloat) ? parsedText : parsedFloat;
 };
 
 const parseText$ = x => parseText($(x).text());
@@ -35,7 +35,7 @@ const parseText$ = x => parseText($(x).text());
 const parseFloatOrText$ = (x) => {
   const parsedText = parseText$(x);
   const parsedFloat = parseFloat(parsedText);
-  return isNaN(parsedFloat) ? parsedText : parsedFloat;
+  return Number.isNaN(parsedFloat) ? parsedText : parsedFloat;
 };
 
 // 从 `table tr` 中获取一个课程信息

@@ -4,7 +4,6 @@
   },
   "rules": {
     "semi":["error","always"],
-    "no-restricted-globals": "off",
     "no-mixed-operators": "off",
     "no-param-reassign": "off"
   },

@@ -8,5 +8,5 @@ const file = resolve(__dirname, './dist/manifest.json');
 if (manifest.version !== pkg.version) {
   manifest.version = pkg.version;
   writeFileSync(file, JSON.stringify(manifest, null, 2));
-  console.log(`updated to v${manifest.version}!`); // eslint-disable-line
+  console.log(`Updated to v${manifest.version}!`); // eslint-disable-line
 }
