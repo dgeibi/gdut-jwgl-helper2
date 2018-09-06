@@ -1,24 +1,24 @@
 {
   "name": "GDUT 教务管理系统 helper2",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "manifest_version": 2,
-  "description": "make http://222.200.98.147/ better.",
+  "description": "make jxfw.gdut.edu.cn great again",
   "content_scripts": [
     {
       "matches": [
-        "http://222.200.98.147/*"
+        "http://222.200.98.146/*",
+        "http://222.200.98.147/*",
+        "http://jxfw.gdut.edu.cn/*"
       ],
-      "js": [
-        "inject.js"
-      ],
+      "js": ["inject.js"],
       "all_frames": true,
       "run_at": "document_idle"
     }
   ],
-  "web_accessible_resources": [
-    "helper.js"
-  ],
+  "web_accessible_resources": ["helper.js"],
   "permissions": [
-    "http://222.200.98.147/*"
+    "http://222.200.98.146/*",
+    "http://222.200.98.147/*",
+    "http://jxfw.gdut.edu.cn/*"
   ]
 }
